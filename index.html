@@ -165,17 +165,24 @@
       </div>
 
       <!-- стена -->
-      <div class="section-title">wall</div>
-      <p class="hint">Leave a message on the wall </p>
+      <div class="section-title">wall <a href="#" id="wallClear" class="mini">обновить</a></div>
+      <p class="hint">Leave a message on the wall — стена общая, видно с любого устройства. ник можно занять паролем: пишешь откуда угодно, главное знать пароль.</p>
 
       <form id="wallForm" onsubmit="return postToWall(event)">
         <div class="row">
-          <input type="text" id="wallName" maxlength="20" placeholder="имя" required>
+          <input type="text" id="wallName" maxlength="20" placeholder="ник" required autocomplete="username">
+          <input type="password" id="wallPass" maxlength="64" placeholder="пароль от ника" required autocomplete="current-password">
         </div>
         <div class="row">
           <textarea id="wallMsg" rows="3" maxlength="300" placeholder="сообщение" required></textarea>
         </div>
-        <button type="submit">send</button>
+        <div class="row wall-caprow">
+          <img id="wallCap" class="wall-cap" alt="капча" title="нажми, чтобы обновить">
+          <input type="text" id="wallCapAnswer" maxlength="6" placeholder="CAPTCHA" required autocomplete="off">
+          <button type="submit" id="wallSend">send</button>
+        </div>
+        <div class="row"><span class="wall-note" id="wallNote"></span></div>
+        <input type="text" id="wallHp" class="wall-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       </form>
 
       <div id="wall" class="wall"></div>

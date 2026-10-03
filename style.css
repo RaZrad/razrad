@@ -190,7 +190,7 @@ body.halloween .ava-halloween { display: block; }
 
 /* стена */
 .row { margin-bottom: 6px; }
-input[type="text"], textarea {
+input[type="text"], input[type="password"], textarea {
   width: 100%;
   max-width: 420px;
   font-family: Verdana, Geneva, Arial, sans-serif;
@@ -200,6 +200,7 @@ input[type="text"], textarea {
   border: 2px inset #cfcfcf;
   resize: vertical;
 }
+input[type="password"] { font-family: "Courier New", monospace; }
 button[type="submit"] {
   font-family: Verdana, Geneva, Arial, sans-serif;
   font-size: 12px;
@@ -209,6 +210,23 @@ button[type="submit"] {
   cursor: pointer;
 }
 button[type="submit"]:active { border-style: inset; }
+button[type="submit"][disabled] { color: #808080; cursor: default; }
+
+/* форма стены: ник + пароль в одну строку, капча рядом с кнопкой */
+#wallName, #wallPass { display: inline-block; width: 205px; max-width: 45%; }
+.wall-caprow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.wall-cap {
+  width: 168px;
+  height: 54px;
+  border: 2px inset #cfcfcf;
+  background: #c0c0c0;
+  cursor: pointer;
+}
+.wall-caprow input[type="text"] { width: 110px; max-width: 110px; font-family: "Courier New", monospace; }
+.wall-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.wall-note { font-size: 11px; min-height: 14px; }
+.wall-note.good { color: #007700; }
+.wall-note.bad  { color: #b00000; }
 
 .wall { margin-top: 14px; }
 .wall-entry {
@@ -218,6 +236,8 @@ button[type="submit"]:active { border-style: inset; }
 }
 .wall-entry .who { font-weight: bold; color: #000060; }
 .wall-entry .when { float: right; font-size: 10px; color: #777777; }
+.wall-entry .wall-del { font-size: 10px; margin-left: 4px; color: #777777; text-decoration: none; }
+.wall-entry .wall-del:hover { color: #ee0000; }
 .wall-empty { color: #777777; font-size: 11px; }
 
 /* подвал */
@@ -486,11 +506,14 @@ body.night .likes li.active a { color: #ffcc00; }
 body.night #sc { border-color: #3a4a8a; }
 body.night .catbox { background: #0d1122; border-color: #2a3358; }
 body.night .cat-note { color: #8394c0; }
-body.night input[type="text"], body.night textarea {
+body.night input[type="text"], body.night input[type="password"], body.night textarea {
   background: #0d1122;
   color: #dbe2ff;
   border-color: #2a3358;
 }
+body.night .wall-note.good { color: #7cd67c; }
+body.night .wall-note.bad  { color: #ff8080; }
+body.night .wall-entry .wall-del { color: #8394c0; }
 body.night button[type="submit"] { background: #25305a; border-color: #25305a; color: #cfe0ff; }
 body.night .wall-entry { border-color: #2a3358; }
 body.night .wall-entry .who { color: #9db4ff; }
@@ -527,6 +550,12 @@ body.halloween .desc { color: #c9a887; }
 body.halloween .links a { background: #2a1400; border-color: #2a1400; color: #ffb066 !important; }
 body.halloween .wall-entry .who { color: #b34a00; }
 body.halloween .wall-entry { border-color: #4a2a00; }
+body.halloween .wall-note.good { color: #ffb066; }
+body.halloween .wall-note.bad  { color: #ff6060; }
+body.halloween .wall-entry .wall-del { color: #c98a5a; }
+body.halloween input[type="text"],
+body.halloween input[type="password"],
+body.halloween textarea { background: #120c05; color: #c9a887; border-color: #4a2a00; }
 body.halloween .rand { background: #ff7518; border-color: #ff7518; color: #1a0d00; }
 body.halloween .footer { background: #120c05; color: #c98a5a; border-color: #ff7518; }
 body.halloween .pop-note { color: #c98a5a; }

@@ -24,7 +24,6 @@ var CAT_LOCAL = [
 
 var DISCORD_NAME = "razrad_";
 var MAIL_ADDR    = "razrad@xyecoc.com";
-var WALL_KEY     = "razrad_wall_2";     /* сменил ключ — старая стена очищена */
 var HITS_KEY     = "razrad_hits";
 var VOL_KEY      = "razrad_vol";
 var MODE_KEY     = "razrad_mode";       /* day | night | halloween */
@@ -136,33 +135,60 @@ function playTrack(idx) {
   }
 }
 
-/* ---------- стена ---------- */
-function getWall() {
-  try { return JSON.parse(localStorage.getItem(WALL_KEY)) || []; }
-  catch (e) { return []; }
-}
-function saveWall(list) {
-  try { localStorage.setItem(WALL_KEY, JSON.stringify(list)); } catch (e) {}
-}
-function postToWall(ev) {
-  ev.preventDefault();
-  var name = document.getElementById("wallName").value.trim();
-  var msg = document.getElementById("wallMsg").value.trim();
-  if (!name || !msg) return false;
+/* ---------- стена: общая, через Cloudflare Worker + KV ---------- */
+var WALL_API     = "https://razrad-dashboard.vanyokpenok123321.workers.dev";
+var WALL_NICK    = "razrad_wall_nick";   /* последний ник — только для подсказки, пароль не храним */
+var WALL_RATE    = 900;                 /* сек между сообщениями, уточняется у сервера */
+var wallCdUntil  = 0;
+var wallOpenedAt = Date.now();
+var wallCapToken = "";
 
-  var list = getWall();
-  list.unshift({ name: name, msg: msg, ts: Date.now() });
-  if (list.length > 100) list = list.slice(0, 100);
-  saveWall(list);
-  renderWall();
-  document.getElementById("wallForm").reset();
-  return false;
+function wallNote(text, kind) {
+  var el = document.getElementById("wallNote");
+  if (!el) return;
+  el.textContent = text || "";
+  el.className = "wall-note" + (kind ? " " + kind : "");
 }
-function renderWall() {
+
+function wallApi(path, body) {
+  return fetch(WALL_API + path, body ? {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  } : undefined).then(function (r) {
+    return r.json().catch(function () { return { ok: false, error: "badjson" }; });
+  }).catch(function () { return { ok: false, error: "offline" }; });
+}
+
+function wallErrorText(d) {
+  var e = d && d.error;
+  if (e === "captcha") return "капча не совпала — новая картинка уже загружена.";
+  if (e === "fast")    return "форма открыта слишком недолго — подожди пару секунд.";
+  if (e === "pass")    return "пароль от этого ника не подходит.";
+  if (e === "locked")  return "слишком много попыток с неверным паролем. попробуй через час.";
+  if (e === "nick")    return "ник не подходит: 2–20 символов, буквы/цифры/._-";
+  if (e === "text")    return "сообщение пустое или слишком длинное.";
+  if (e === "ip")      return "слишком много попыток с этого устройства. подожди час.";
+  if (e === "rate")    return "подожди " + Math.ceil((d.retry || WALL_RATE) / 60) + " мин — одно сообщение в " + Math.ceil(WALL_RATE / 60) + " мин.";
+  if (e === "offline") return "не долетел до стены. проверь интернет.";
+  if (e === "config")  return "стена ещё не настроена на сервере.";
+  return "стена не ответила (" + (e || "ошибка") + ").";
+}
+
+function loadCaptcha() {
+  return wallApi("/api/captcha").then(function (d) {
+    var img = document.getElementById("wallCap");
+    if (!img) return;
+    if (!d.ok || !d.svg) { img.removeAttribute("src"); return; }
+    wallCapToken = d.token;
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(d.svg);
+  });
+}
+
+function renderWall(list) {
   var box = document.getElementById("wall");
   if (!box) return;
-  var list = getWall();
-  if (!list.length) {
+  if (!list || !list.length) {
     box.innerHTML = '<div class="wall-empty">пока пусто. будь первым.</div>';
     return;
   }
@@ -171,21 +197,142 @@ function renderWall() {
     var e = list[i];
     html += '<div class="wall-entry">' +
               '<span class="when">' + fmt(e.ts) + '</span>' +
-              '<span class="who">' + esc(e.name) + '</span><br>' + esc(e.msg) +
+              '<span class="who">' + esc(e.nick) + '</span>' +
+              '<a href="#" class="wall-del" data-id="' + esc(e.id) + '" data-nick="' +
+                esc(e.nick) + '" title="удалить (нужен пароль от ника)">del</a><br>' +
+              esc(e.text) +
             '</div>';
   }
   box.innerHTML = html;
 }
-function initWallClear() {
-  var btn = document.getElementById("wallClear");
-  if (!btn) return;
-  btn.onclick = function (e) {
-    e.preventDefault();
-    if (!window.confirm("очистить всю стену?")) return false;
-    saveWall([]);
-    renderWall();
+
+function refreshWall() {
+  return wallApi("/api/posts").then(function (d) {
+    if (d.ok) { renderWall(d.posts); return; }
+    renderWall([]);
+    wallNote(wallErrorText(d), "bad");
+  });
+}
+
+function postToWall(ev) {
+  ev.preventDefault();
+  var f = document.getElementById("wallForm");
+  var nameEl = document.getElementById("wallName");
+  var passEl = document.getElementById("wallPass");
+  var msgEl = document.getElementById("wallMsg");
+  var ansEl = document.getElementById("wallCapAnswer");
+  if (!f || !nameEl || !passEl || !msgEl || !ansEl) {
+    wallNote("форма стены устарела — обнови страницу (ctrl+F5).", "bad");
     return false;
+  }
+  var name = nameEl.value.trim();
+  var pass = passEl.value;
+  var msg  = msgEl.value.trim();
+  var ans  = ansEl.value.trim();
+  if (!name || !msg || !ans) return false;
+
+  var send = document.getElementById("wallSend");
+  send.disabled = true;
+  wallNote("отправляю...");
+
+  return wallApi("/api/post", {
+    nick: name,
+    pass: pass,
+    text: msg,
+    captcha: wallCapToken,
+    answer: ans,
+    t0: wallOpenedAt,
+    hp: (document.getElementById("wallHp") || {}).value || ""
+  }).then(function (d) {
+    send.disabled = false;
+    if (d.ok) {
+      try { localStorage.setItem(WALL_NICK, name); } catch (e) {}
+      msgEl.value = "";
+      ansEl.value = "";
+      wallOpenedAt = Date.now();
+      wallNote(d.created
+        ? "ник «" + name + "» теперь твой — заходи с этим паролем откуда угодно."
+        : "записано!", "good");
+      loadCaptcha();
+      refreshWall();
+      setWallCd((d.retry || WALL_RATE) * 1000);
+    } else {
+      wallNote(wallErrorText(d), "bad");
+      loadCaptcha();
+    }
+    return false;
+  });
+}
+
+/* обратный отсчёт до следующего сообщения */
+function setWallCd(ms) {
+  wallCdUntil = Date.now() + ms;
+  var send = document.getElementById("wallSend");
+  var note = document.getElementById("wallNote");
+  var tick = function () {
+    var left = wallCdUntil - Date.now();
+    if (left <= 0) {
+      send.disabled = false;
+      send.textContent = "send";
+      if (note && /подожди|следующее/.test(note.textContent)) note.textContent = "";
+      return;
+    }
+    var min = Math.ceil(left / 60000);
+    send.disabled = true;
+    send.textContent = "⏳ " + min + " мин";
+    wallNote("следующее сообщение можно оставить через " + min + " мин.");
+    setTimeout(tick, 5000);
   };
+  tick();
+}
+
+function initWall() {
+  var btn = document.getElementById("wallClear");
+  if (btn) btn.onclick = function (e) { e.preventDefault(); refreshWall(); return false; };
+
+  /* клик по картинке — новая капча */
+  var cap = document.getElementById("wallCap");
+  if (cap) {
+    cap.onclick = function () {
+      document.getElementById("wallCapAnswer").value = "";
+      loadCaptcha();
+    };
+  }
+
+  /* удаление своего поста: спрашиваем пароль */
+  var box = document.getElementById("wall");
+  if (box) {
+    box.onclick = function (e) {
+      var a = e.target;
+      if (!a || !a.classList || !a.classList.contains("wall-del")) return;
+      e.preventDefault();
+      var nick = a.getAttribute("data-nick");
+      var id = a.getAttribute("data-id");
+      var pass = window.prompt("пароль от ника «" + nick + "»:");
+      if (!pass) return;
+      wallNote("удаляю...");
+      wallApi("/api/delete", { id: id, nick: nick, pass: pass }).then(function (d) {
+        if (d.ok) { wallNote("удалено", "good"); refreshWall(); }
+        else wallNote(wallErrorText(d), "bad");
+      });
+    };
+  }
+
+  /* подставляем прошлый ник (пароль не храним) */
+  try {
+    var last = localStorage.getItem(WALL_NICK);
+    if (last) {
+      var nameEl = document.getElementById("wallName");
+      if (nameEl && !nameEl.value) nameEl.value = last;
+    }
+  } catch (e) {}
+
+  /* лимиты с сервера + стартовое состояние */
+  wallApi("/api/config").then(function (d) {
+    if (d.ok && d.rate) WALL_RATE = d.rate;
+  });
+  loadCaptcha();
+  refreshWall();
 }
 
 /* ---------- баннер: счётчик заходов ---------- */
@@ -486,8 +633,7 @@ function initModes() {
 /* ---------- старт ---------- */
 window.onload = function () {
   initCounter();
-  renderWall();
-  initWallClear();
+  initWall();
   bindCopy("discordBtn", DISCORD_NAME, "ник в discord");
   bindCopy("mailBtn", MAIL_ADDR, "e-mail");
   initModes();

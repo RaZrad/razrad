@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>razrad wall — тест</title>
+</head>
+<body>
+<pre id="out">запуск…</pre>
+<script type="module">
+import wall from "../worker/wall-worker.js";
+
+const SECRET = "test-secret-123";
+const store = new Map();
+
+const env = {
+  WALL_SECRET: SECRET,
+  WALL: {
+    async get(key, type) {
+      const v = store.get(key);
+      if (v === undefined) return null;
+      if (type === "json") { try { return JSON.parse(v); } catch (e) { return null; } }
+      return v;
+    },
+    async put(key, value) { store.set(key, String(value)); },
+    async delete(key) { store.delete(key); }
+  }
+};
+
+let log = [];
+let failed = 0;
+
+function say(name, cond, extra) {
+  if (!cond) failed++;
+  log.push((cond ? "OK   " : "FAIL ") + name + (extra ? " [" + extra + "]" : ""));
+  document.getElementById("out").textContent = log.join("\n");
+}
+
+async function call(path, opts) {
+  const headers = Object.assign({ "CF-Connecting-IP": "1.2.3.4" }, (opts && opts.headers) || {});
+  const req = new Request("https://worker.test" + path, Object.assign({ headers }, opts || {}));
+  const res = await wall.fetch(req, env, {});
+  const body = await res.json().catch(() => ({}));
+  return { status: res.status, body: body, res: res };
+}
+
+function post(path, data) {
+  return call(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+}
+
+/* из svg вытаскиваем ответ капчи (только для теста) */
+function captchaAnswer(svg) {
+  const chars = svg.match(/<text class="ch"[^>]*>[^<]*<\/text>/g) || [];
+  return chars.map((c) => c.replace(/<[^>]+>/g, "")).join("").toUpperCase();
+}
+
+async function freshCaptcha() {
+  const r = await call("/api/captcha");
+  if (!r.body.ok) throw new Error("captcha failed: " + JSON.stringify(r.body));
+  return { token: r.body.token, answer: captchaAnswer(r.body.svg), svg: r.body.svg };
+}
+
+async function run() {
+  let r = await call("/api/ping");
+  say("ping", r.body.ok === true && r.body.service === "razrad-wall");
+
+  r = await call("/api/config");
+  say("config: задержка 900 сек", r.body.ok && r.body.rate === 900, "rate=" + r.body.rate);
+
+  r = await call("/api/ping");
+  say("CORS заголовки", r.res.headers.get("Access-Control-Allow-Origin") === "*");
+
+  let cap = await freshCaptcha();
+  say("капча: svg рисуется", cap.svg.indexOf("<svg") === 0 && cap.svg.length > 200);
+  say("капча: 4 символа", cap.answer.length === 4, cap.answer);
+  say("капча: токен подписан", typeof cap.token === "string" && cap.token.indexOf(".") > 0);
+
+  cap = await freshCaptcha();
+  r = await post("/api/post", {
+    nick: "тест", pass: "pw", text: "hi",
+    captcha: cap.token, answer: "ZZZZ", t0: Date.now() - 5000, hp: ""
+  });
+  say("неверная капча отклонена", r.body.error === "captcha", r.body.error);
+
+  cap = await freshCaptcha();
+  r = await post("/api/post", {
+    nick: "тест", pass: "pw", text: "hi",
+    captcha: cap.token, answer: cap.answer, t0: Date.now(), hp: ""
+  });
+  say("слишком быстрая отправка отклонена", r.body.error === "fast", r.body.error);
+
+  cap = await freshCaptcha();
+  r = await post("/api/post", {
+    nick: "бот", pass: "pw", text: "spam",
+    captcha: cap.token, answer: cap.answer, t0: Date.now() - 5000, hp: "http://spam"
+  });
+  say("honeypot ловит бота", r.body.error === "spam", r.body.error);
+  r = await call("/api/posts");
+  say("honeypot ничего не записал", r.body.posts.length === 0, "posts=" + r.body.posts.length);
+
+  cap = await freshCaptcha();
+  r = await post("/api/post", {
+    nick: "a", pass: "pw", text: "hi",
+    captcha: cap.token, answer: cap.answer, t0: Date.now() - 5000, hp: ""
+  });
+  say("короткий ник отклонён", r.body.error === "nick", r.body.error);
+
+  cap = await freshCaptcha();
+  r = await post("/api/post", {
+    nick: "razrad", pass: "secretpw", text: "первый пост",
+    captcha: cap.token, answer: cap.answer, t0: Date.now() - 5000, hp: ""
+  });
+  say("первый пост принят", r.body.ok === true, JSON.stringify(r.body));
+  say("ник создан", r.body.created === true);
+  const postId = r.body.id;
+
+  r = await call("/api/posts");
+  say("пост появился в ленте", r.body.posts.length === 1 && r.body.posts[0].text === "первый пост");
+  say("в посте виден ник", r.body.posts[0].nick === "razrad");
+
+  r = await call("/api/nick?nick=razrad");
+  say("ник занят", r.body.taken === true);
+  r = await call("/api/nick?nick=" + encodeURIComponent("свободный"));
+  say("свободный ник не занят", r.body.taken === false);
+
+  cap = await freshCaptcha();
+  r = await post("/api/post", {
+    nick: "razrad", pass: "неверный", text: "взлом",
+    captcha: cap.token, answer: cap.answer, t0: Date.now() - 5000, hp: ""
+  });
+  say("неверный пароль отклонён", r.body.error === "pass", r.body.error);
+  say("ошибка пароля не замаскирована лимитом", r.body.error !== "rate");
+
+  cap = await freshCaptcha();
+  r = await post("/api/post", {
+    nick: "razrad", pass: "secretpw", text: "второй пост",
+    captcha: cap.token, answer: cap.answer, t0: Date.now() - 5000, hp: ""
+  });
+  say("задержка 15 минут работает", r.body.error === "rate", r.body.error);
+  say("retry около 900 сек", r.body.retry > 850 && r.body.retry <= 900, "retry=" + r.body.retry);
+
+  cap = await freshCaptcha();
+  r = await post("/api/post", {
+    nick: "другой", pass: "pw2", text: "пост от другого ника",
+    captcha: cap.token, answer: cap.answer, t0: Date.now() - 5000, hp: ""
+  });
+  say("другой ник может писать", r.body.ok === true, JSON.stringify(r.body));
+
+  const forged = cap.token.slice(0, -3) + "AAA";
+  cap = await freshCaptcha();
+  r = await post("/api/post", {
+    nick: "подделка", pass: "pw", text: "hi",
+    captcha: forged, answer: cap.answer, t0: Date.now() - 5000, hp: ""
+  });
+  say("подделанная подпись капчи отклонена", r.body.error === "captcha", r.body.error);
+
+  r = await post("/api/delete", { id: postId, nick: "razrad", pass: "неверный" });
+  say("удаление чужим паролем отклонено", r.body.error === "pass", r.body.error);
+
+  r = await post("/api/delete", { id: postId, nick: "razrad", pass: "secretpw" });
+  say("удаление своим паролем работает", r.body.ok === true && r.body.removed === 1, JSON.stringify(r.body));
+  r = await call("/api/posts");
+  say("удалённый пост исчез", r.body.posts.length === 1 && r.body.posts[0].text !== "первый пост");
+
+  r = await post("/api/wipe", { nick: "другой", pass: "pw2" });
+  say("wipe удаляет все посты ника", r.body.ok === true && r.body.removed === 1, JSON.stringify(r.body));
+  r = await call("/api/posts");
+  say("после wipe лента пуста", r.body.posts.length === 0);
+
+  r = await call("/api/nope");
+  say("404 на неизвестный путь", r.status === 404);
+
+  document.getElementById("out").textContent =
+    log.join("\n") + "\n\nИТОГ: " + (failed ? failed + " провалов" : "все проверки прошли");
+  document.title = failed ? ("FAIL: " + failed) : "PASS";
+}
+
+run().catch((e) => {
+  document.getElementById("out").textContent =
+    log.join("\n") + "\n\nИСКЛЮЧЕНИЕ: " + ((e && e.stack) || e);
+  document.title = "EXCEPTION";
+});
+</script>
+</body>
+</html>

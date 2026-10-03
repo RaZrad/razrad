@@ -1,0 +1,44 @@
+<!-- Показывает 3 капчи подряд — проверка читаемости ретро-картинки.
+     Открыть через http://localhost:8850/tools/captcha_look.html -->
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>captcha look</title>
+<style>
+body { background: #37424e; font-family: Verdana, sans-serif; padding: 20px; }
+.row { display: flex; gap: 12px; margin-bottom: 14px; }
+.cap { width: 168px; height: 54px; border: 2px inset #cfcfcf; background: #c0c0c0; }
+.ans { font-family: "Courier New", monospace; font-size: 16px; background: #fff;
+       border: 2px inset #cfcfcf; padding: 4px 10px; }
+.lbl { color: #9fb0d8; font-size: 12px; margin-bottom: 6px; }
+</style></head>
+<body>
+<div class="lbl">captcha, как её увидит человек:</div>
+<div class="row" id="r"></div>
+<script type="module">
+import wall from "../worker/wall-worker.js";
+const store = new Map();
+const env = { WALL_SECRET: "look", WALL: {
+  async get(k, t) { const v = store.get(k); if (v === undefined) return null;
+    if (t === "json") { try { return JSON.parse(v); } catch (e) { return null; } } return v; },
+  async put(k, v) { store.set(k, String(v)); }
+} };
+const r = document.getElementById("r");
+for (let i = 0; i < 3; i++) {
+  const res = await wall.fetch(new Request("https://x.test/api/captcha", { headers: {} }), env, {});
+  const d = await res.json();
+  const box = document.createElement("div");
+  const img = document.createElement("img");
+  img.className = "cap";
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(d.svg);
+  const ans = (d.svg.match(/<text class="ch"[^>]*>[^<]*<\/text>/g) || [])
+    .map((c) => c.replace(/<[^>]+>/g, "")).join("");
+  const out = document.createElement("span");
+  out.className = "ans";
+  out.textContent = ans;
+  box.appendChild(img);
+  box.appendChild(document.createTextNode(" "));
+  box.appendChild(out);
+  r.appendChild(box);
+}
+document.title = "CAPTCHAS-READY";
+</script>
+</body></html>
