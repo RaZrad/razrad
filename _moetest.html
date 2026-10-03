@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>moe sprite zoom</title>
+<style>
+body { background: #202030; color: #dbe2ff; font: 12px Verdana, sans-serif; margin: 10px; }
+.row { display: flex; gap: 0; margin-bottom: 10px; }
+.row img { display: block; image-rendering: pixelated; }
+.z { background: #00ff00; }
+.h100 img { height: 100px; }
+.h130 img { height: 130px; }
+.h60 img { height: 60px; }
+</style>
+</head>
+<body>
+<div>0-9 @130px on GREEN (transparency check)</div>
+<div class="row h130 z">
+  <img src="gifs/moe/0.gif"><img src="gifs/moe/1.gif"><img src="gifs/moe/2.gif">
+  <img src="gifs/moe/3.gif"><img src="gifs/moe/4.gif"><img src="gifs/moe/5.gif">
+  <img src="gifs/moe/6.gif"><img src="gifs/moe/7.gif"><img src="gifs/moe/8.gif">
+  <img src="gifs/moe/9.gif">
+</div>
+<div>same 0-9 @130px (dark bg)</div>
+<div class="row h130">
+  <img src="gifs/moe/0.gif"><img src="gifs/moe/1.gif"><img src="gifs/moe/2.gif">
+  <img src="gifs/moe/3.gif"><img src="gifs/moe/4.gif"><img src="gifs/moe/5.gif">
+  <img src="gifs/moe/6.gif"><img src="gifs/moe/7.gif"><img src="gifs/moe/8.gif">
+  <img src="gifs/moe/9.gif">
+</div>
+<div>number 0010337 @100px (как в баннере)</div>
+<div class="row h100">
+  <img src="gifs/moe/0.gif"><img src="gifs/moe/0.gif"><img src="gifs/moe/1.gif">
+  <img src="gifs/moe/0.gif"><img src="gifs/moe/3.gif"><img src="gifs/moe/3.gif">
+  <img src="gifs/moe/7.gif">
+</div>
+<div>number 0010337 @60px</div>
+<div class="row h60">
+  <img src="gifs/moe/0.gif"><img src="gifs/moe/0.gif"><img src="gifs/moe/1.gif">
+  <img src="gifs/moe/0.gif"><img src="gifs/moe/3.gif"><img src="gifs/moe/3.gif">
+  <img src="gifs/moe/7.gif">
+</div>
+<div>live getloli @130px</div>
+<div class="row">
+  <img style="height:130px" src="https://count.getloli.com/get/@razrads?theme=moebooru&amp;padding=7&amp;darkmode=0&amp;scale=1">
+</div>
+</body>
+</html>

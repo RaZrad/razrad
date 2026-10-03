@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>razrad</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="halloween">
+
+<!-- ===== РєРЅРѕРїРєРё СЂРµР¶РёРјРѕРІ (СЃРїСЂР°РІР° СЃРЅРёР·Сѓ) ===== -->
+<div class="modes">
+  <button id="night" class="mode-btn" title="РЅРѕС‡РЅРѕР№ СЂРµР¶РёРј">рџЊ™</button>
+  <button id="pumpkin" class="mode-btn" title="С…РµР»Р»РѕСѓРёРЅ-СЂРµР¶РёРј">рџЋѓ</button>
+</div>
+
+<!-- ===== РґРµРєРѕСЂ: РѕР±С‹С‡РЅС‹Р№ СЂРµР¶РёРј ===== -->
+<div class="decor decor-day" aria-hidden="true">
+  <img class="d-run" src="gifs/cat-run.gif" alt="">
+  <img class="d-pix" src="gifs/cat-pixel.gif" alt="">
+  <img class="d-face" src="gifs/cat-face.gif" alt="">
+  <img class="d-heart" src="gifs/cat-heart.gif" alt="">
+  <img class="d-sp1" src="gifs/sparkle-star.gif" alt="">
+  <img class="d-sp2" src="gifs/sparkle-star.gif" alt="">
+  <img class="d-sp3" src="gifs/sparkle-gold.gif" alt="">
+</div>
+
+<!-- ===== РґРµРєРѕСЂ: РЅРѕС‡РЅРѕР№ СЂРµР¶РёРј ===== -->
+<div class="decor decor-night" aria-hidden="true">
+  <img class="n-moon" src="gifs/moon-full.gif" alt="">
+  <img class="n-cresc" src="gifs/moon-crescent.gif" alt="">
+  <img class="n-owl" src="gifs/owl.gif" alt="">
+  <img class="n-run" src="gifs/cat-run.gif" alt="">
+  <img class="n-sp1" src="gifs/sparkle-star.gif" alt="">
+  <img class="n-sp2" src="gifs/sparkle-star.gif" alt="">
+  <img class="n-sp3" src="gifs/sparkle-star.gif" alt="">
+  <img class="n-city" src="gifs/night-city.gif" alt="">
+</div>
+
+<!-- ===== РґРµРєРѕСЂ: С…РµР»Р»РѕСѓРёРЅ ===== -->
+<div class="decor decor-halloween" aria-hidden="true">
+  <svg class="cobweb cobweb-tl" viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M0 0 L100 0 M0 0 L92 38 M0 0 L71 71 M0 0 L38 92 M0 0 L0 100"/>
+    <path d="M25 0 A25 25 0 0 1 0 25"/>
+    <path d="M45 0 A45 45 0 0 1 0 45"/>
+    <path d="M65 0 A65 65 0 0 1 0 65"/>
+    <path d="M85 0 A85 85 0 0 1 0 85"/>
+  </svg>
+  <svg class="cobweb cobweb-tr" viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M0 0 L100 0 M0 0 L92 38 M0 0 L71 71 M0 0 L38 92 M0 0 L0 100"/>
+    <path d="M25 0 A25 25 0 0 1 0 25"/>
+    <path d="M45 0 A45 45 0 0 1 0 45"/>
+    <path d="M65 0 A65 65 0 0 1 0 65"/>
+    <path d="M85 0 A85 85 0 0 1 0 85"/>
+  </svg>
+
+  <div class="spider-line">
+    <div class="spider-thread"></div>
+    <img class="spider" src="gifs/spider2.gif" alt="">
+  </div>
+
+  <img class="bat bat1" src="gifs/bat.gif" alt="">
+  <img class="bat bat2" src="gifs/bat.gif" alt="">
+  <img class="bat bat3" src="gifs/bat.gif" alt="">
+
+  <img class="h-cat" src="gifs/cat-pixel2.gif" alt="">
+  <img class="h-scene" src="gifs/cat-spooky.gif" alt="">
+  <img class="pumpkins" src="gifs/pumpkins.gif" alt="">
+</div>
+
+<table class="page" cellpadding="0" cellspacing="0">
+<tbody>
+
+  <!-- С€Р°РїРєР° -->
+  <tr>
+    <td class="header">razrad</td>
+  </tr>
+
+  <!-- Р±Р°РЅРЅРµСЂ СЃРѕ СЃС‡С‘С‚С‡РёРєРѕРј Р·Р°С…РѕРґРѕРІ -->
+  <tr>
+    <td class="banner-cell">
+      <div class="banner">
+        <img class="banner-neko" src="gifs/neko-girl.gif" alt="">
+        <div class="banner-mid">
+          <div class="banner-line1">вњ¦ РґРѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ РЅР° razrad вњ¦</div>
+          <div class="banner-line2">
+            РІРёР·РёС‚ в„– <span class="odometer" id="odometer">000000</span>
+          </div>
+        </div>
+        <img class="banner-cat" src="gifs/cat-face.gif" alt="">
+      </div>
+    </td>
+  </tr>
+
+  <!-- С‚РµР»Рѕ -->
+  <tr>
+    <td class="main">
+
+      <!-- РїСЂРѕС„РёР»СЊ -->
+      <table class="profile" width="100%" cellpadding="10" cellspacing="0">
+      <tbody>
+        <tr>
+          <td class="ava-cell" width="112" valign="top">
+            <img class="ava-img ava-day" src="kowk.png" alt="razrad">
+            <img class="ava-img ava-halloween" src="vampkowk.png" alt="razrad">
+          </td>
+          <td valign="top">
+            <div class="nick">razrad</div>
+            <p class="desc">
+              moscow.<br>
+              music, likes, links. С‚СѓС‚ РІСЃС‘ РѕР±Рѕ РјРЅРµ.
+            </p>
+            <div class="links">
+              <a href="https://soundcloud.com/razrads" target="_blank" rel="noopener">soundcloud</a>
+              <a href="https://t.me/razrads" target="_blank" rel="noopener">telegram</a>
+              <a href="https://namemc.com/profile/razrads.1" target="_blank" rel="noopener">namemc</a>
+              <a href="https://tiktok.com/@nerxzrd" target="_blank" rel="noopener">tiktok</a>
+              <a href="#" id="discordBtn" title="СЃРєРѕРїРёСЂРѕРІР°С‚СЊ РЅРёРє РІ discord">discord</a>
+              <a href="#" id="mailBtn" title="СЃРєРѕРїРёСЂРѕРІР°С‚СЊ РїРѕС‡С‚Сѓ">mail</a>
+            </div>
+            <div class="copied" id="copied"></div>
+          </td>
+        </tr>
+      </tbody>
+      </table>
+
+      <!-- soundcloud likes -->
+      <div class="section-title">soundcloud likes</div>
+
+      <div class="sc-row">
+        <button id="randBtn" class="rand">рџЋІ СЂР°РЅРґРѕРјРЅС‹Р№ С‚СЂРµРє</button>
+        <span class="vol">рџ”Љ <input type="range" id="vol" min="0" max="100" value="80" title="РіСЂРѕРјРєРѕСЃС‚СЊ"><span id="volVal">80</span></span>
+      </div>
+      <div class="now" id="now">РІС‹Р±РµСЂРё С‚СЂРµРє РёР»Рё Р¶РјРё СЂР°РЅРґРѕРј</div>
+
+      <iframe id="sc" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+        src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F2278392017&color=%23000080&show_artwork=false&show_comments=false&sharing=false&buying=false&download=false"></iframe>
+
+      <ul class="likes" id="tracklist"></ul>
+
+
+      <!-- СЂР°РЅРґРѕРјРЅС‹Рµ РєРѕС‚РёРєРё -->
+      <div class="section-title">random cats</div>
+      <p class="hint">Р¶РјРё РєРЅРѕРїРєСѓ вЂ” Р±СѓРґРµС‚ РЅРѕРІС‹Р№ РєРѕС‚РёРє (СЃРЅР°С‡Р°Р»Р° РїСЂРѕР±СѓРµС‚ РёРЅС‚РµСЂРЅРµС‚, РµСЃР»Рё СЃРµС‚Рё РЅРµС‚ вЂ” Р±РµСЂС‘С‚ РёР· Р»РѕРєР°Р»СЊРЅРѕР№ РєРѕР»Р»РµРєС†РёРё)</p>
+
+      <div class="catbox">
+        <img id="catImg" src="gifs/cat-globe.gif" alt="РєРѕС‚РёРє">
+      </div>
+      <div class="cat-row">
+        <button id="catBtn" class="rand">рџЋІ СЂР°РЅРґРѕРјРЅС‹Р№ РєРѕС‚РёРє</button>
+        <span class="cat-note" id="catNote"></span>
+      </div>
+
+      <!-- СЃС‚РµРЅР° -->
+      <div class="section-title">СЃС‚РµРЅР° <a href="#" id="wallClear" class="mini">РѕС‡РёСЃС‚РёС‚СЊ</a></div>
+      <p class="hint">РѕСЃС‚Р°РІСЊ СЃРІРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РЅР° СЃС‚РµРЅРµ</p>
+
+      <form id="wallForm" onsubmit="return postToWall(event)">
+        <div class="row">
+          <input type="text" id="wallName" maxlength="20" placeholder="РёРјСЏ" required>
+        </div>
+        <div class="row">
+          <textarea id="wallMsg" rows="3" maxlength="300" placeholder="СЃРѕРѕР±С‰РµРЅРёРµ" required></textarea>
+        </div>
+        <button type="submit">РѕС‚РїСЂР°РІРёС‚СЊ</button>
+      </form>
+
+      <div id="wall" class="wall"></div>
+
+    </td>
+  </tr>
+
+  <!-- РїРѕРґРІР°Р» -->
+  <tr>
+    <td class="footer">В© razrad В· made in 2000s style В· рџђ€</td>
+  </tr>
+
+</tbody>
+</table>
+
+<script src="https://w.soundcloud.com/player/api.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
+
