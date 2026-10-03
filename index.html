@@ -82,8 +82,8 @@
       <div class="banner">
         <img class="banner-neko" src="gifs/neko-girl.gif" alt="">
         <div class="banner-mid">
-          <div class="banner-line1">✦ добро пожаловать на razrad ✦</div>
-          <div class="banner-line2">визит №</div>
+          <div class="banner-line1">✦ razrad`s bio ✦</div>
+          <div class="banner-line2">visitor counter</div>
           <!-- живой счётчик посещений (moe-counter, тема moebooru: неко-тян с табличками-цифрами) -->
           <div class="moe-wrap" id="moeWrap">
             <img class="moe-img" id="moeImg" alt="счётчик посещений"
@@ -113,7 +113,7 @@
             <div class="nick">razrad</div>
             <p class="desc">
               moscow.<br>
-              bio
+              bio.
             </p>
             <div class="links">
               <a href="https://soundcloud.com/razrads" target="_blank" rel="noopener">soundcloud</a>
@@ -130,13 +130,13 @@
       </table>
 
       <!-- soundcloud likes -->
-      <div class="section-title">soundcloud likes</div>
+      <div class="section-title">music</div>
 
       <div class="sc-row">
-        <button id="randBtn" class="rand">🎲 рандомный трек</button>
+        <button id="randBtn" class="rand">🎲 random track</button>
         <span class="vol">🔊 <input type="range" id="vol" min="0" max="100" value="80" title="громкость"><span id="volVal">80</span></span>
       </div>
-      <div class="now" id="now">выбери трек или жми рандом</div>
+      <div class="now" id="now">pick a track or choose random</div>
 
       <iframe id="sc" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
         src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F2278392017&color=%23000080&show_artwork=false&show_comments=false&sharing=false&buying=false&download=false"></iframe>
@@ -146,19 +146,19 @@
 
       <!-- рандомные котики -->
       <div class="section-title">random cats</div>
-      <p class="hint">жми кнопку — будет новый котик (сначала пробует интернет, если сети нет — берёт из локальной коллекции)</p>
+      <p class="hint">press the button</p>
 
       <div class="catbox">
         <img id="catImg" src="gifs/cat-globe.gif" alt="котик">
       </div>
       <div class="cat-row">
-        <button id="catBtn" class="rand">🎲 рандомный котик</button>
+        <button id="catBtn" class="rand">🎲 random cat</button>
         <span class="cat-note" id="catNote"></span>
       </div>
 
       <!-- стена -->
-      <div class="section-title">стена <a href="#" id="wallClear" class="mini">очистить</a></div>
-      <p class="hint">оставь свое сообщение на стене</p>
+      <div class="section-title">стена</div>
+      <p class="hint">Leave a message on the wall </p>
 
       <form id="wallForm" onsubmit="return postToWall(event)">
         <div class="row">
@@ -167,7 +167,7 @@
         <div class="row">
           <textarea id="wallMsg" rows="3" maxlength="300" placeholder="сообщение" required></textarea>
         </div>
-        <button type="submit">отправить</button>
+        <button type="submit">send</button>
       </form>
 
       <div id="wall" class="wall"></div>
@@ -177,7 +177,7 @@
 
   <!-- подвал -->
   <tr>
-    <td class="footer">© razrad · made in 2000s style · 🐈</td>
+    <td class="footer">© razrad · 99.9% vibecoded · 🐈</td>
   </tr>
 
 </tbody>
