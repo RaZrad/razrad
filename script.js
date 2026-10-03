@@ -4,14 +4,14 @@
    чтобы обновить — просто добавь/поменяй строки ниже */
 var SC_TRACKS = [
   { t: "CUPSIZE - Я Ненавижу Этот Ебучий Дождь",       u: "https://soundcloud.com/w1rten/cupsize-ya-nenavizhu-etot", id: "2278392017" },
-  { t: "CUPSIZE - упаду (snippet 16.09.26)",            u: "https://soundcloud.com/linalifonova/ypady-snippet-16-09-26", id: "2401311264" },
+  { t: "CUPSIZE - упаду (snippet)",            u: "https://soundcloud.com/linalifonova/ypady-snippet-16-09-26", id: "2401311264" },
   { t: "internetdoublex - kitten club (angeless)",      u: "https://soundcloud.com/internet2x/kitten-club-angeless", id: "1383628255" },
   { t: "Alice - Parade 2025",                           u: "https://soundcloud.com/alicelitter/parade", id: "2209484633" },
-  { t: "SOURCE MUSIC - ONDA ANDAR - one way ticket",    u: "https://soundcloud.com/source-mus/onda-andar-one-way-ticket-1", id: "2402664552" },
+  { t: "ONDA ANDAR - one way ticket",    u: "https://soundcloud.com/source-mus/onda-andar-one-way-ticket-1", id: "2402664552" },
   { t: "королевский XVII - l2 hunter",                  u: "https://soundcloud.com/royalxvii/l2-hunter", id: "1600948998" },
   { t: "sqwore - roma2",                                u: "https://soundcloud.com/sqwhore/roma2", id: "2216443505" },
-  { t: "CUPSIZE - антидепрессанты (snippet 11.07.26)",  u: "https://soundcloud.com/linalifonova/antidepressanty-snippet-11-07-26", id: "2358846302" },
-  { t: "wowsizee - злая зая ХД madk1d",                 u: "https://soundcloud.com/german-ilin-555497570/zlaya-zaya-xd-madk1d", id: "2272657124" },
+  { t: "CUPSIZE - антидепрессанты (snippet)",  u: "https://soundcloud.com/linalifonova/antidepressanty-snippet-11-07-26", id: "2358846302" },
+  { t: "madk1d - злая зая ХД",                 u: "https://soundcloud.com/german-ilin-555497570/zlaya-zaya-xd-madk1d", id: "2272657124" },
   { t: "CUPSIZE - Я Мёртв (snippet)",                   u: "https://soundcloud.com/528950741/cupsize-ya-myortv", id: "1811995290" }
 ];
 
