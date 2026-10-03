@@ -285,6 +285,176 @@ function initCats() {
   note.textContent = "";
 }
 
+/* ---------- pop it: окно в стиле сапера, поле 32×32 без бомб и флажков ---------- */
+var POP_SIZE = 32;
+var POP_TOTAL = POP_SIZE * POP_SIZE;
+var POP_SOUND = "sounds/pop.wav";
+var POP_POOL = [];        /* несколько копий звука, чтобы клики не резались */
+var popPoolIdx = 0;
+var popGridBuilt = false;
+
+/* короткий приятный «пузырёк»: высокий питч -> низкий, чем ниже клетка по ряду */
+function playPop(row) {
+  initPopSound();
+  var a = POP_POOL[popPoolIdx];
+  popPoolIdx = (popPoolIdx + 1) % POP_POOL.length;
+  var rate = 1.32 - (row / (POP_SIZE - 1)) * 0.62;   /* сверху звончее, снизу глуше */
+  try {
+    a.pause();
+    a.currentTime = 0;
+    a.playbackRate = rate;
+    a.volume = Math.max(0, Math.min(1, volume / 100));
+    var p = a.play();
+    if (p && p.catch) p.catch(function () {});
+  } catch (e) {}
+}
+
+/* обратное «вдувание»: тот же звук, но ниже и тише */
+function playInflate() {
+  initPopSound();
+  var a = POP_POOL[popPoolIdx];
+  popPoolIdx = (popPoolIdx + 1) % POP_POOL.length;
+  try {
+    a.pause();
+    a.currentTime = 0;
+    a.playbackRate = 0.72 + Math.random() * 0.1;
+    a.volume = Math.max(0, Math.min(1, volume / 100)) * 0.55;
+    var p = a.play();
+    if (p && p.catch) p.catch(function () {});
+  } catch (e) {}
+}
+
+function initPopSound() {
+  if (POP_POOL.length) return;
+  for (var i = 0; i < 6; i++) {
+    var a = new Audio(POP_SOUND);
+    a.preload = "auto";
+    try { a.load(); } catch (e) {}
+    POP_POOL.push(a);
+  }
+}
+
+function buildPopGrid() {
+  if (popGridBuilt) return;
+  var grid = document.getElementById("popGrid");
+  if (!grid) return;
+  var html = "";
+  for (var i = 0; i < POP_TOTAL; i++) {
+    html += '<div class="pop-cell" data-i="' + i + '"></div>';
+  }
+  grid.innerHTML = html;
+  popGridBuilt = true;
+}
+
+function popCount() {
+  var grid = document.getElementById("popGrid");
+  return grid ? grid.querySelectorAll(".pop-cell.popped").length : 0;
+}
+function updatePopStat() {
+  var el = document.getElementById("popStat");
+  if (el) el.textContent = "попнуто: " + popCount() + " / " + POP_TOTAL;
+}
+
+function clearPopField() {
+  var grid = document.getElementById("popGrid");
+  if (!grid) return;
+  var cells = grid.querySelectorAll(".pop-cell");
+  for (var i = 0; i < cells.length; i++) {
+    cells[i].className = "pop-cell";
+  }
+  updatePopStat();
+}
+
+function openPopModal() {
+  var m = document.getElementById("popModal");
+  if (!m) return;
+  buildPopGrid();
+  initPopSound();
+  m.hidden = false;
+  updatePopStat();
+}
+
+function closePopModal() {
+  var m = document.getElementById("popModal");
+  if (m) m.hidden = true;
+}
+
+function initPop() {
+  var btn = document.getElementById("popBtn");
+  if (!btn) return;
+
+  btn.onclick = function () {
+    if (document.getElementById("popModal").hidden) openPopModal();
+    else closePopModal();
+  };
+
+  document.getElementById("popClose").onclick = closePopModal;
+  document.getElementById("popReset").onclick = clearPopField;
+
+  /* клик по фону окна тоже закрывает */
+  document.getElementById("popModal").onclick = function (e) {
+    if (e.target === this) closePopModal();
+  };
+
+  /* правая кнопка мыши / долгое нажатие на тач — «вдуть обратно» */
+  var holdTimer = null;
+
+  function inflateIfPopped(e) {
+    var cell = e.target;
+    if (!cell || !cell.classList || !cell.classList.contains("pop-cell")) return false;
+    if (!cell.classList.contains("popped")) return false;
+    cell.className = "pop-cell";
+    playInflate();
+    updatePopStat();
+    return true;
+  }
+
+  document.addEventListener("contextmenu", function (e) {
+    if (!e.target || !e.target.classList || !e.target.classList.contains("pop-cell")) return;
+    e.preventDefault();
+    inflateIfPopped(e);
+  });
+
+  document.addEventListener("pointerdown", function (e) {
+    var cell = e.target;
+    if (!cell || !cell.classList || !cell.classList.contains("pop-cell")) return;
+    if (e.button === 2) {                 /* правая кнопка — отмена */
+      e.preventDefault();
+      inflateIfPopped(e);
+      return;
+    }
+
+    if (cell.classList.contains("popped")) return;   /* по лопнувшей — ничего */
+
+    var i = parseInt(cell.getAttribute("data-i"), 10);
+    cell.className = "pop-cell popped";
+    playPop(Math.floor(i / POP_SIZE));
+    updatePopStat();
+
+    /* на тач-экранах долгое нажатие по лопнувшей клетке её «вдувает» */
+    if (e.pointerType === "touch") {
+      var target = cell;
+      clearTimeout(holdTimer);
+      holdTimer = setTimeout(function () {
+        holdTimer = null;
+        if (target.classList.contains("popped")) {
+          target.className = "pop-cell";
+          playInflate();
+          updatePopStat();
+        }
+      }, 600);
+    }
+  });
+
+  document.addEventListener("pointerup", function () { clearTimeout(holdTimer); });
+  document.addEventListener("pointercancel", function () { clearTimeout(holdTimer); });
+
+  /* Esc закрывает */
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closePopModal();
+  });
+}
+
 /* ---------- режимы: день / ночь / хеллоуин ---------- */
 function initModes() {
   var nightBtn = document.getElementById("night");
@@ -324,4 +494,5 @@ window.onload = function () {
   initVolume();
   initPlayer();
   initCats();
+  initPop();
 };

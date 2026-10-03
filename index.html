@@ -155,6 +155,15 @@
         <span class="cat-note" id="catNote"></span>
       </div>
 
+      <!-- pop it -->
+      <div class="section-title">pop it</div>
+      <p class="hint">just relax</p>
+
+      <div class="pop-row">
+        <button id="popBtn" class="rand">🫧 open pop it</button>
+        <span class="pop-note" id="popNote">right click - reset one button</span>
+      </div>
+
       <!-- стена -->
       <div class="section-title">wall</div>
       <p class="hint">Leave a message on the wall </p>
@@ -181,6 +190,21 @@
 
 </tbody>
 </table>
+
+<!-- ===== pop it: окно в стиле сапера (без бомб и флажков) ===== -->
+<div class="pop-modal" id="popModal" hidden>
+  <div class="pop-window" role="dialog" aria-modal="true" aria-label="pop it">
+    <div class="pop-title">
+      <span>pop it</span>
+      <button class="pop-close" id="popClose" title="закрыть (Esc)">×</button>
+    </div>
+    <div class="pop-bar">
+      <span class="pop-stat" id="popStat">попнуто: 0 / 1024</span>
+      <button class="pop-reset" id="popReset" title="очистить поле">сброс</button>
+    </div>
+    <div class="pop-grid" id="popGrid"></div>
+  </div>
+</div>
 
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <script src="script.js"></script>
